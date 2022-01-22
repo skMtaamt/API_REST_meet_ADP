@@ -1,0 +1,19 @@
+{
+  "name": "api_rest_meet_adp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skMtaamt/API_REST_meet_ADP.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/skMtaamt/API_REST_meet_ADP/issues"
+  },
+  "homepage": "https://github.com/skMtaamt/API_REST_meet_ADP#readme"
+}
