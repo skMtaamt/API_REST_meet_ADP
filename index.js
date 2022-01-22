@@ -53,4 +53,27 @@ app.post('/group', (req, res) => {
     }
 })
 
+app.get('/meet', (req, res) => {
+    if(!req.headers.authorization) {
+        res.send({"status": false, "response": "not logged"})
+        return;
+    }
+    const user = verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) ? verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) : res.send({"status": false, "response": "not logged"});
+    if(!user) return;
+    try {
+        if(!req.query.group_id) {
+            res.send({"status": false, "response": "query get data is wrong"});
+            return;
+        }
+        let data = JSON.parse(fs.readFileSync("group.json", 'utf8'));
+        if (data[req.query.group_id]["members"].includes(user.id)) {
+            res.send({"status": true, "response": data[req.query.group_id]["meet"]});
+            return;
+        }
+        res.send({"status": false, "response": "this is not your group"});
+    } catch (e) {
+        res.send({"status": false, "response": e.toString()});
+    }
+})
+
 app.listen(3000)
