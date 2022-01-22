@@ -103,6 +103,35 @@ app.post('/meet', (req, res) => {
     }
 })
 
+app.patch('/meet', (req, res) => {
+    if(!req.headers.authorization) {
+        res.send({"status": false, "response": "not logged"})
+        return;
+    }
+    const user = verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) ? verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) : res.send({"status": false, "response": "not logged"});
+    if(!user) return;
+    try {
+        if(!req.body.group_id && !req.body.meet_id && !req.body.timestamp) {
+            res.send({"status": false, "response": "body data is wrong"});
+            return;
+        }
+        if (user.type !== 0) {
+            res.send({"status": false, "response": "you are not a pm"});
+            return;
+        }
+        let data = JSON.parse(fs.readFileSync("group.json", 'utf8'));
+        data[req.body.group_id]["meet"].forEach((el, index) => {
+            if (el["name"] === req.body.meet_id) {
+                data[req.body.group_id]["meet"][index] = {"name": req.body.meet_id, "timestamp": req.body.timestamp}
+            }
+        })
+        fs.writeFileSync("group.json", JSON.stringify(data));
+        res.send({"status": false, "response": "meet modified"});
+    } catch (e) {
+        res.send({"status": false, "response": e.toString()});
+    }
+})
+
 app.delete('/profile', (req, res) => {
     if(!req.headers.authorization) {
         res.send({"status": false, "response": "not logged"})
