@@ -76,4 +76,26 @@ app.get('/meet', (req, res) => {
     }
 })
 
+app.delete('/profile', (req, res) => {
+    if(!req.headers.authorization) {
+        res.send({"status": false, "response": "not logged"})
+        return;
+    }
+    const user = verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) ? verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) : res.send({"status": false, "response": "not logged"});
+    if(!user) return;
+    try {
+        let data = JSON.parse(fs.readFileSync("group.json", 'utf8'));
+        Object.keys(data).forEach((key) => {
+            data[key]["members"] = data[key]["members"].filter((el) => { return el !== user.id });
+        });
+        fs.writeFileSync("group.json", JSON.stringify(data));
+        data = JSON.parse(fs.readFileSync("users.json", 'utf8'));
+        delete data[user.user];
+        fs.writeFileSync("users.json", JSON.stringify(data))
+        res.send({"status": true, "response": "profile deleted"});
+    } catch (e) {
+        res.send({"status": false, "response": e.toString()});
+    }
+})
+
 app.listen(3000)
