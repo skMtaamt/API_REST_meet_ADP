@@ -1,6 +1,7 @@
 const express = require('express')
 const fs = require('fs')
 var jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express()
 app.use(express.json());
@@ -71,6 +72,32 @@ app.get('/meet', (req, res) => {
             return;
         }
         res.send({"status": false, "response": "this is not your group"});
+    } catch (e) {
+        res.send({"status": false, "response": e.toString()});
+    }
+})
+
+app.post('/meet', (req, res) => {
+    if(!req.headers.authorization) {
+        res.send({"status": false, "response": "not logged"})
+        return;
+    }
+    const user = verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) ? verifyUserJwt(req.headers.authorization.replaceAll("Bearer ", "")) : res.send({"status": false, "response": "not logged"});
+    if(!user) return;
+    try {
+        if (user.type !== 0) {
+            res.send({"status": false, "response": "you are not a pm"});
+            return;
+        }
+        if(!req.body.group_id && !req.body.timestamp) {
+            res.send({"status": false, "response": "body data is wrong"});
+            return;
+        }
+        let data = JSON.parse(fs.readFileSync("group.json", 'utf8'));
+        const name = uuidv4()
+        data[req.body.group_id]["meet"].push({"name": name, "timestamp": req.body.timestamp});
+        fs.writeFileSync("group.json", JSON.stringify(data));
+        res.send({"status": true, "response": "created your meet " + name});
     } catch (e) {
         res.send({"status": false, "response": e.toString()});
     }
